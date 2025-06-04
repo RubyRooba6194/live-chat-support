@@ -39,12 +39,25 @@ app.use("/api/messages", messageRoutes);
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
 
-  socket.on("sendMessage", async (data) => {
+//   socket.on("sendMessage", async (data) => {
+//     const { chatId, sender, text } = data;
+//     const Message = require("./models/Message");
+//     const newMessage = await Message.create({ chatId, sender, text });
+//     io.to(chatId).emit("newMessage", newMessage);
+//   });
+
+
+socket.on("sendMessage", async (data) => {
+  try {
     const { chatId, sender, text } = data;
     const Message = require("./models/Message");
     const newMessage = await Message.create({ chatId, sender, text });
     io.to(chatId).emit("newMessage", newMessage);
-  });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    socket.emit("error", { message: "Failed to send message." });
+  }
+});
 
   socket.on("joinRoom", (chatId) => {
     socket.join(chatId);

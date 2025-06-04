@@ -10,10 +10,16 @@ const History = () => {
   const fetchHistory = async () => {
     try {
       const response = await api.get("/messages/history");
-      setHistory(response.data);
+      // Adjust here based on API shape:
+      setHistory(
+        Array.isArray(response.data)
+          ? response.data
+          : response.data.history || []
+      );
     } catch (error) {
       toast.error("Failed to load history");
       console.error(error);
+      setHistory([]); // fallback
     } finally {
       setLoading(false);
     }

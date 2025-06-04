@@ -1,9 +1,15 @@
 import axios from "axios";
 
+// const API = axios.create({
+//   baseURL: "http://localhost:3000/api",
+//   withCredentials: true,
+// });
+
+// Use environment variable for baseURL, fallback to current origin for production
 const API = axios.create({
-  baseURL: "http://localhost:3000/api",
-  withCredentials: true,
-});
+    baseURL: import.meta.env.VITE_API_URL || window.location.origin + "/api",
+    withCredentials: true,
+  });
 
 export const sendMessage = (chatId, message) =>
   API.post(`/messages`, { chatId, text: message });

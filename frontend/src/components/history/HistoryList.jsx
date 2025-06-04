@@ -1,6 +1,8 @@
 import React from "react";
 
 const HistoryList = ({ history, onSelect }) => {
+    const safeHistory = Array.isArray(history) ? history : [];
+
   if (!history || history.length === 0) {
     return (
       <div className="p-4 text-gray-500 text-center">
@@ -8,6 +10,7 @@ const HistoryList = ({ history, onSelect }) => {
       </div>
     );
   }
+
 
   return (
     <div className="overflow-y-auto space-y-2 p-4">
