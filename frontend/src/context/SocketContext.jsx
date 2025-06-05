@@ -1,29 +1,13 @@
-// import React, { createContext, useEffect, useState } from "react";
-// import { io } from "socket.io-client";
-
-// export const SocketContext = createContext();
-
-// export const SocketProvider = ({ children }) => {
-//   const [socket, setSocket] = useState(null);
-
-//   useEffect(() => {
-//     const newSocket = io("http://localhost:3000");
-//     setSocket(newSocket);
-//     return () => newSocket.close();
-//   }, []);
-
-//   return (
-//     <SocketContext.Provider value={{ socket }}>
-//       {children}
-//     </SocketContext.Provider>
-//   );
-// };
 
 
 import React, { createContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-export const SocketContext = createContext();
+const socket = io("http://localhost:3000", {
+  transports: ["websocket", "polling"],
+});
+
+export const SocketContext = createContext({ socket });
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
