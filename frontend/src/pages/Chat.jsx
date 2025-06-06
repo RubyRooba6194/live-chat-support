@@ -2,8 +2,8 @@ import { useParams } from "react-router-dom";
 import React, { useEffect, useState, useContext } from "react";
 import { SocketContext } from "../context/SocketContext";
 import ChatBox from "../components/chat/ChatBox";
-import axios from "axios"; // adjust the path as needed
-import { v4 as uuidv4 } from "uuid"; // Add uuid for temp IDs
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 const Chat = () => {
   const { chatId: rawChatId } = useParams();
@@ -19,34 +19,35 @@ const Chat = () => {
 
     socket.emit("joinRoom", chatId);
 
+    // Use single slash, and always use full URL for local dev if needed
     axios
-      .get(`/api/messages/${chatId}`)
+      .get(`http://localhost:3000/api/messages/${chatId}`)
       .then((res) => setMessages(res.data))
       .catch((err) => console.error("Failed to fetch messages:", err));
 
-      const handleNewMessage = (message) => {
-        setMessages((prev) => {
-          // Remove any optimistic message that matches (by content, sender, timestamp, or tempId if you use it)
-          const filtered = prev.filter(
-            (m) =>
-              !(
-                m._optimistic &&
-                m.text === message.text &&
-                m.sender === message.sender &&
-                m.timestamp === message.timestamp
-              )
-          );
-          // Avoid adding duplicate if the message already exists (by _id or unique content+timestamp)
-          const exists = filtered.some(
-            (m) =>
-              (m._id && message._id && m._id === message._id) ||
-              (m.text === message.text &&
-                m.sender === message.sender &&
-                m.timestamp === message.timestamp)
-          );
-          return exists ? filtered : [...filtered, message];
-        });
-      };
+    const handleNewMessage = (message) => {
+      setMessages((prev) => {
+        // Remove any optimistic message that matches (by content, sender, timestamp, or tempId if you use it)
+        const filtered = prev.filter(
+          (m) =>
+            !(
+              m._optimistic &&
+              m.text === message.text &&
+              m.sender === message.sender &&
+              m.timestamp === message.timestamp
+            )
+        );
+        // Avoid adding duplicate if the message already exists (by _id or unique content+timestamp)
+        const exists = filtered.some(
+          (m) =>
+            (m._id && message._id && m._id === message._id) ||
+            (m.text === message.text &&
+              m.sender === message.sender &&
+              m.timestamp === message.timestamp)
+        );
+        return exists ? filtered : [...filtered, message];
+      });
+    };
     socket.on("newMessage", handleNewMessage);
 
     return () => {
@@ -71,7 +72,9 @@ const Chat = () => {
       tempId,
     };
     setMessages((prev) => [...prev, newMessage]);
-    socket.emit("sendMessage", { ...newMessage }); // Don't send tempId/_optimistic to backend
+    // Remove _optimistic and tempId before sending to backend
+    const { _optimistic, tempId: _tempId, ...toSend } = newMessage;
+    socket.emit("sendMessage", toSend);
   };
 
   return (
